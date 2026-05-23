@@ -1,26 +1,78 @@
-import { Injectable } from '@nestjs/common';
-import { CreateShortLinkDto } from './dto/create-short-link.dto';
-import { UpdateShortLinkDto } from './dto/update-short-link.dto';
+import {
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
+import { ShortLink } from './entities/short-link.entity';
+
+import * as crypto from 'crypto';
 
 @Injectable()
 export class ShortLinkService {
-  create(createShortLinkDto: CreateShortLinkDto) {
-    return 'This action adds a new shortLink';
+  constructor(
+    @InjectRepository(ShortLink)
+    private shortLinkRepository: Repository<ShortLink>,
+  ) {}
+
+  // it is finding first raw value of coloumn from database table
+  async findOneByCode(shortCode: string) {
+    return this.shortLinkRepository.findOneBy({ shortCode });
   }
 
-  findAll() {
-    return `This action returns all shortLink`;
+  // this is checking already existing url in database
+  async create(longUrl: string) {
+    const existing =
+      await this.shortLinkRepository.findOneBy({
+        longUrl,
+      });
+
+    if (existing) {
+      return existing;
+    }
+
+    const shortCode =
+      await this.generateUniqueShortCode(longUrl);
+      //create() performs in memory and makes it combined one entity object
+      const newLink =  
+      this.shortLinkRepository.create({ 
+        longUrl,
+        shortCode,
+      });
+
+    return this.shortLinkRepository.save(newLink);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} shortLink`;
-  }
+  private async generateUniqueShortCode(
+    longUrl: string,
+  ): Promise<string> {
+    const HASH_LENGTH = 7;
 
-  update(id: number, updateShortLinkDto: UpdateShortLinkDto) {
-    return `This action updates a #${id} shortLink`;
-  }
+    let attempt = 0;
 
-  remove(id: number) {
-    return `This action removes a #${id} shortLink`;
+    while (attempt < 10) {
+      const salt = attempt > 0 ? String(attempt) : '';
+
+      const hash = crypto
+        .createHash('sha256')
+        .update(longUrl + salt)
+        .digest('base64url')
+        .substring(0, HASH_LENGTH);
+
+      const exists =
+        await this.findOneByCode(hash);
+
+      if (!exists) {
+        return hash;
+      }
+
+      attempt++;
+    }
+
+    throw new InternalServerErrorException(
+      'Unable to generate short code',
+    );
   }
 }
