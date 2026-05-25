@@ -1,9 +1,9 @@
-import { CreateShortLinkDto } from './dto/create-short-link.dto';
-import { UpdateShortLinkDto } from './dto/update-short-link.dto';
+import { Repository } from 'typeorm';
+import { ShortLink } from './entities/short-link.entity';
 export declare class ShortLinkService {
-    create(createShortLinkDto: CreateShortLinkDto): string;
-    findAll(): string;
-    findOne(id: number): string;
-    update(id: number, updateShortLinkDto: UpdateShortLinkDto): string;
-    remove(id: number): string;
+    private shortLinkRepository;
+    constructor(shortLinkRepository: Repository<ShortLink>);
+    findOneByCode(shortCode: string): Promise<ShortLink | null>;
+    create(longUrl: string): Promise<ShortLink>;
+    private generateUniqueShortCode;
 }

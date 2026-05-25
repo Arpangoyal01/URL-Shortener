@@ -16,66 +16,43 @@ exports.ShortLinkController = void 0;
 const common_1 = require("@nestjs/common");
 const short_link_service_1 = require("./short-link.service");
 const create_short_link_dto_1 = require("./dto/create-short-link.dto");
-const update_short_link_dto_1 = require("./dto/update-short-link.dto");
 let ShortLinkController = class ShortLinkController {
     shortLinkService;
     constructor(shortLinkService) {
         this.shortLinkService = shortLinkService;
     }
-    create(createShortLinkDto) {
-        return this.shortLinkService.create(createShortLinkDto);
+    async createShortLink(createShortLinkDto) {
+        const link = await this.shortLinkService.create(createShortLinkDto.url);
+        return {
+            shortCode: link.shortCode,
+        };
     }
-    findAll() {
-        return this.shortLinkService.findAll();
-    }
-    findOne(id) {
-        return this.shortLinkService.findOne(+id);
-    }
-    update(id, updateShortLinkDto) {
-        return this.shortLinkService.update(+id, updateShortLinkDto);
-    }
-    remove(id) {
-        return this.shortLinkService.remove(+id);
+    async redirect(shortCode, res) {
+        const link = await this.shortLinkService.findOneByCode(shortCode);
+        if (!link) {
+            throw new common_1.NotFoundException('Short link not found');
+        }
+        return res.redirect(301, link.longUrl);
     }
 };
 exports.ShortLinkController = ShortLinkController;
 __decorate([
-    (0, common_1.Post)(),
+    (0, common_1.Post)('shorten'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_short_link_dto_1.CreateShortLinkDto]),
-    __metadata("design:returntype", void 0)
-], ShortLinkController.prototype, "create", null);
+    __metadata("design:returntype", Promise)
+], ShortLinkController.prototype, "createShortLink", null);
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Get)(':shortCode'),
+    __param(0, (0, common_1.Param)('shortCode')),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], ShortLinkController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ShortLinkController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_short_link_dto_1.UpdateShortLinkDto]),
-    __metadata("design:returntype", void 0)
-], ShortLinkController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], ShortLinkController.prototype, "remove", null);
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ShortLinkController.prototype, "redirect", null);
 exports.ShortLinkController = ShortLinkController = __decorate([
-    (0, common_1.Controller)('short-link'),
+    (0, common_1.Controller)(),
     __metadata("design:paramtypes", [short_link_service_1.ShortLinkService])
 ], ShortLinkController);
 //# sourceMappingURL=short-link.controller.js.map

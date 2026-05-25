@@ -10,11 +10,14 @@ exports.ShortLinkModule = void 0;
 const common_1 = require("@nestjs/common");
 const short_link_service_1 = require("./short-link.service");
 const short_link_controller_1 = require("./short-link.controller");
+const short_link_entity_1 = require("./entities/short-link.entity");
+const typeorm_1 = require("@nestjs/typeorm");
 let ShortLinkModule = class ShortLinkModule {
 };
 exports.ShortLinkModule = ShortLinkModule;
 exports.ShortLinkModule = ShortLinkModule = __decorate([
     (0, common_1.Module)({
+        imports: [typeorm_1.TypeOrmModule.forFeature([short_link_entity_1.ShortLink])],
         controllers: [short_link_controller_1.ShortLinkController],
         providers: [short_link_service_1.ShortLinkService],
     })
