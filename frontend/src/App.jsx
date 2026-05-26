@@ -4,8 +4,12 @@ import axios from "axios";
 function App() {
   const [url, setUrl] = useState("");
   const [shortUrl, setShortUrl] = useState("");
+  const [shortCode, setShortCode] = useState("");
+
+  const [analytics, setAnalytics] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // create short url
   const generateShortUrl = async () => {
     if (!url) return;
 
@@ -20,17 +24,38 @@ function App() {
       );
 
       const shortCode = response.data.shortCode;
+      setShortCode(shortCode);
 
       setShortUrl(
         `http://localhost:3000/${shortCode}`
       );
-    } catch (error) {
+      
+    }
+    catch (error) {
       console.log(error);
       alert("Something went wrong");
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   };
+
+    // fetch analytics data
+  const fetchAnalytics = async () => {
+    if (!shortCode) return;
+
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/analytics/${shortCode}`
+      );
+
+      setAnalytics(response.data);
+    } catch (error) {
+      console.log(error);
+      alert("Error fetching analytics");
+    }
+  };
+
 
   return (
     <div
@@ -78,6 +103,68 @@ function App() {
           </a>
         </div>
       )}
+
+      {/* analytics btn */}
+      {shortCode && (
+        <button
+          onClick={fetchAnalytics}
+          style={{
+            padding: "12px",
+            cursor: "pointer",
+          }}
+        >
+          Show Analytics
+        </button>
+      )}
+
+      {/* analytics data */}
+      {analytics.length > 0 && (
+        <div
+          style={{
+            border: "1px solid gray",
+            padding: "20px",
+          }}
+        >
+          <h2>Analytics</h2>
+
+          <h3>
+            Total Clicks: {analytics.length}
+          </h3>
+
+          {analytics.map((item) => (
+            <div
+              key={item.id}
+              style={{
+                borderBottom:
+                  "1px solid lightgray",
+                marginBottom: "10px",
+                paddingBottom: "10px",
+              }}
+            >
+              {/* use strong tag to bold the text */}
+              <p>
+                <strong>IP:</strong>{" "}
+                {item.ipAddress}
+              </p>
+
+              <p>
+                <strong>User Agent:</strong>{" "}
+                {item.userAgent}
+              </p>
+
+              {/* it converts timeStamp string:"2026-05-26T10:30:00.000Z"
+              into js data object: 26/5/2026, 4:00:00 pm */}
+              <p>
+                <strong>Visited At:</strong>{" "}
+                {new Date(
+                  item.visitedAt
+                ).toLocaleString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
     </div>
   );
 }
