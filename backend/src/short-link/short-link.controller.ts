@@ -36,6 +36,11 @@ export class ShortLinkController {
     };
   }
 
+  @Get('analytics/all')
+  async getAnalytics() {
+  return this.analyticsService.findAll();
+  }
+  
   @Get(':shortCode')
   async redirect(
     @Param('shortCode') shortCode: string,
@@ -44,7 +49,7 @@ export class ShortLinkController {
   ) {
     const link =
       await this.shortLinkService.findOneByCode(
-        shortCode,
+        shortCode
       );
 
     if (!link) {
@@ -62,8 +67,4 @@ export class ShortLinkController {
     return res.redirect(301, link.longUrl);
   }
 
-  @Get('analytics/all')
-  async getAnalytics() {
-  return this.analyticsService.findAll();
-  }
 }
