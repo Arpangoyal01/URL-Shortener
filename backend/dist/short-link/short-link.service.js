@@ -59,12 +59,25 @@ let ShortLinkService = class ShortLinkService {
     async findOneByCode(shortCode) {
         return this.shortLinkRepository.findOneBy({ shortCode });
     }
-    async create(longUrl) {
+    async create(longUrl, customAlias) {
         const existing = await this.shortLinkRepository.findOneBy({
             longUrl,
         });
         if (existing) {
             return existing;
+        }
+        if (customAlias) {
+            const aliasExists = await this.shortLinkRepository.findOneBy({
+                shortCode: customAlias,
+            });
+            if (aliasExists) {
+                throw new common_1.ConflictException('Custom alias already taken');
+            }
+            const newLink = this.shortLinkRepository.create({
+                longUrl,
+                shortCode: customAlias,
+            });
+            return this.shortLinkRepository.save(newLink);
         }
         const shortCode = await this.generateUniqueShortCode(longUrl);
         const newLink = this.shortLinkRepository.create({

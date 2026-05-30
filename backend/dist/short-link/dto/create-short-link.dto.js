@@ -13,10 +13,15 @@ exports.CreateShortLinkDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateShortLinkDto {
     url;
+    customAlias;
 }
 exports.CreateShortLinkDto = CreateShortLinkDto;
 __decorate([
     (0, class_validator_1.IsUrl)(),
     __metadata("design:type", String)
 ], CreateShortLinkDto.prototype, "url", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateShortLinkDto.prototype, "customAlias", void 0);
 //# sourceMappingURL=create-short-link.dto.js.map

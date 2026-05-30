@@ -9,6 +9,6 @@ export declare class ShortLinkController {
     createShortLink(createShortLinkDto: CreateShortLinkDto): Promise<{
         shortCode: string;
     }>;
-    redirect(shortCode: string, req: Request, res: Response): Promise<void>;
     getAnalytics(): Promise<import("../analytics/entities/analytics.entity").Analytics[]>;
+    redirect(shortCode: string, req: Request, res: Response): Promise<void>;
 }

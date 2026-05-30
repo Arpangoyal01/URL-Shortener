@@ -25,10 +25,13 @@ let ShortLinkController = class ShortLinkController {
         this.analyticsService = analyticsService;
     }
     async createShortLink(createShortLinkDto) {
-        const link = await this.shortLinkService.create(createShortLinkDto.url);
+        const link = await this.shortLinkService.create(createShortLinkDto.url, createShortLinkDto.customAlias);
         return {
             shortCode: link.shortCode,
         };
+    }
+    async getAnalytics() {
+        return this.analyticsService.findAll();
     }
     async redirect(shortCode, req, res) {
         const link = await this.shortLinkService.findOneByCode(shortCode);
@@ -38,9 +41,6 @@ let ShortLinkController = class ShortLinkController {
         await this.
             analyticsService.create(link, req.ip || 'unknown', req.headers['user-agent'] || 'unknown');
         return res.redirect(301, link.longUrl);
-    }
-    async getAnalytics() {
-        return this.analyticsService.findAll();
     }
 };
 exports.ShortLinkController = ShortLinkController;
@@ -52,6 +52,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ShortLinkController.prototype, "createShortLink", null);
 __decorate([
+    (0, common_1.Get)('analytics/all'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ShortLinkController.prototype, "getAnalytics", null);
+__decorate([
     (0, common_1.Get)(':shortCode'),
     __param(0, (0, common_1.Param)('shortCode')),
     __param(1, (0, common_1.Req)()),
@@ -60,12 +66,6 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], ShortLinkController.prototype, "redirect", null);
-__decorate([
-    (0, common_1.Get)('analytics/all'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], ShortLinkController.prototype, "getAnalytics", null);
 exports.ShortLinkController = ShortLinkController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [short_link_service_1.ShortLinkService,

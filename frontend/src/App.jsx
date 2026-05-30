@@ -5,7 +5,7 @@ function App() {
   const [url, setUrl] = useState("");
   const [shortUrl, setShortUrl] = useState("");
   const [shortCode, setShortCode] = useState("");
-
+  const [customAlias, setCustomAlias] = useState("");
   const [analytics, setAnalytics] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -16,12 +16,15 @@ function App() {
     try {
       setLoading(true);
 
+      // request for shortcode
       const response = await axios.post(
         "http://localhost:3000/shorten",
         {
           url,
+          customAlias,
         }
       );
+
 
       const shortCode = response.data.shortCode;
       setShortCode(shortCode);
@@ -29,7 +32,7 @@ function App() {
       setShortUrl(
         `http://localhost:3000/${shortCode}`
       );
-      
+
     }
     catch (error) {
       console.log(error);
@@ -40,7 +43,7 @@ function App() {
     }
   };
 
-    // fetch analytics data
+  // fetch analytics data
   const fetchAnalytics = async () => {
     if (!shortCode) return;
 
@@ -78,6 +81,13 @@ function App() {
           padding: "10px",
           fontSize: "16px",
         }}
+      />
+
+      <input
+        type="text"
+        placeholder="Custom Alias (optional)"
+        value={customAlias}
+        onChange={(e) => setCustomAlias(e.target.value)}
       />
 
       <button

@@ -28,7 +28,7 @@ export class ShortLinkController {
     @Body() createShortLinkDto: CreateShortLinkDto,
   ) {
     const link = await this.shortLinkService.create(
-      createShortLinkDto.url,
+      createShortLinkDto.url,createShortLinkDto.customAlias,
     );
 
     return {
@@ -40,7 +40,7 @@ export class ShortLinkController {
   async getAnalytics() {
   return this.analyticsService.findAll();
   }
-  
+
   @Get(':shortCode')
   async redirect(
     @Param('shortCode') shortCode: string,

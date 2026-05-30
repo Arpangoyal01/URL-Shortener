@@ -20,6 +20,9 @@ export class ShortLink {
   @Column('text')
   longUrl!: string;
 
+  // @Column()
+  // customAlias!: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

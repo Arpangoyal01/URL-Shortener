@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,15 +16,42 @@ export class ShortLinkService {
   constructor(
     @InjectRepository(ShortLink)
     private shortLinkRepository: Repository<ShortLink>,
-  ) {}
+  ) { }
 
   // it is finding first raw value of coloumn from database table
   async findOneByCode(shortCode: string) {
     return this.shortLinkRepository.findOneBy({ shortCode });
   }
 
-  // this is checking already existing url in database
-  async create(longUrl: string) {
+  // // this is checking already existing url in database
+  // async create(longUrl: string,) {
+  //   const existing =
+  //     await this.shortLinkRepository.findOneBy({
+  //       longUrl, 
+  //     });
+
+  //   if (existing) {
+  //     return existing;
+  //   }
+
+  //   const shortCode =
+  //     await this.generateUniqueShortCode(longUrl);
+  //     //create() performs in memory and makes it combined one entity object
+  //     const newLink =  
+  //     this.shortLinkRepository.create({ 
+  //       longUrl,
+  //       shortCode,
+  //     });
+
+  //   return this.shortLinkRepository.save(newLink);
+  // }
+
+
+  //custom alias
+  async create(
+    longUrl: string,
+    customAlias?: string,
+  ) {
     const existing =
       await this.shortLinkRepository.findOneBy({
         longUrl,
@@ -33,17 +61,39 @@ export class ShortLinkService {
       return existing;
     }
 
+    if (customAlias) {
+      const aliasExists =
+        await this.shortLinkRepository.findOneBy({
+          shortCode: customAlias,
+        });
+
+      if (aliasExists) {
+        throw new ConflictException(
+          'Custom alias already taken',
+        );
+      }
+
+      const newLink =
+        this.shortLinkRepository.create({
+          longUrl,
+          shortCode: customAlias,
+        });
+
+      return this.shortLinkRepository.save(newLink);
+    }
+
     const shortCode =
       await this.generateUniqueShortCode(longUrl);
-      //create() performs in memory and makes it combined one entity object
-      const newLink =  
-      this.shortLinkRepository.create({ 
+
+    const newLink =
+      this.shortLinkRepository.create({
         longUrl,
         shortCode,
       });
 
     return this.shortLinkRepository.save(newLink);
   }
+
 
   private async generateUniqueShortCode(
     longUrl: string,
