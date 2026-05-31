@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
-import { Analytics } from 'src/analytics/entities/analytics.entity'
-import { ShortLink } from 'src/short-link/entities/short-link.entity' 
+import { Analytics } from './entities/analytics.entity';
+import { ShortLink } from '../short-link/entities/short-link.entity'; 
 
 @Injectable()
 export class AnalyticsService {
