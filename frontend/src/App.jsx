@@ -36,7 +36,7 @@ function App() {
     }
     catch (error) {
       console.log(error);
-      alert("Something went wrong");
+      alert("error in code generation");
     }
     finally {
       setLoading(false);
@@ -49,7 +49,7 @@ function App() {
 
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/${shortCode}`
+        `${import.meta.env.VITE_API_URL}/analytics/${shortCode}`
       );
 
       setAnalytics(response.data);
