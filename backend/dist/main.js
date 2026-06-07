@@ -12,7 +12,7 @@ async function bootstrap() {
     app.useGlobalPipes(new common_1.ValidationPipe());
     app.use((0, helmet_1.default)());
     app.enableCors();
-    await app.listen(process.env.Port || 3000);
+    await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

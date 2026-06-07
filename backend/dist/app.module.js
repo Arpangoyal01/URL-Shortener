@@ -31,13 +31,12 @@ exports.AppModule = AppModule = __decorate([
             ]),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: process.env.DB_HOST,
-                port: Number(process.env.DB_PORT),
-                username: process.env.DB_USERNAME,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME,
+                url: process.env.DB_URL,
                 autoLoadEntities: true,
                 synchronize: true,
+                ssl: {
+                    rejectUnauthorized: false,
+                },
             }),
             short_link_module_1.ShortLinkModule,
             analytics_module_1.AnalyticsModule,
