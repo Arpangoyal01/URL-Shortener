@@ -20,7 +20,7 @@ import { APP_GUARD } from '@nestjs/core';
 
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url:process.env.DB_URL,
+      url:process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true,
       ssl:{
