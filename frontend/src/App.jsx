@@ -18,7 +18,7 @@ function App() {
 
       // request for shortcode
       const response = await axios.post(
-        "http://localhost:3000/shorten",
+        `${import.meta.env.VITE_API_URL}/shorten`,
         {
           url,
           customAlias,
@@ -30,7 +30,7 @@ function App() {
       setShortCode(shortCode);
 
       setShortUrl(
-        `http://localhost:3000/${shortCode}`
+        `${import.meta.env.VITE_API_URL}/${shortCode}`
       );
 
     }
@@ -49,7 +49,7 @@ function App() {
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/analytics/${shortCode}`
+        `${import.meta.env.VITE_API_URL}/${shortCode}`
       );
 
       setAnalytics(response.data);
