@@ -51,6 +51,7 @@ export class ShortLinkService {
   async create(
     longUrl: string,
     customAlias?: string,
+    userId?:number,
   ) {
     const existing =
       await this.shortLinkRepository.findOneBy({
@@ -77,6 +78,7 @@ export class ShortLinkService {
         this.shortLinkRepository.create({
           longUrl,
           shortCode: customAlias,
+          userId,
         });
 
       return this.shortLinkRepository.save(newLink);

@@ -13,6 +13,9 @@ export class ShortLink {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  @Column({nullable:true})
+  userId!:number;
+
   @Column({ unique: true })
   @Index()
   shortCode!: string;

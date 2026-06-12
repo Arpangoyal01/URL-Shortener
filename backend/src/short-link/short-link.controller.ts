@@ -7,12 +7,11 @@ import {
   Post,
   Res,
   Req,
+  UseGuards,
 } from '@nestjs/common';
-
+import { JwtAuthGuard } from '../authentication/jwt-auth.guard';
 import { AnalyticsService } from '../analytics/analytics.service';
-
 import type { Request, Response } from 'express';
-
 import { ShortLinkService } from './short-link.service';
 import { CreateShortLinkDto } from './dto/create-short-link.dto';
 
@@ -24,11 +23,16 @@ export class ShortLinkController {
   ) { }
 
   @Post('shorten')
+  @UseGuards(JwtAuthGuard)
   async createShortLink(
     @Body() createShortLinkDto: CreateShortLinkDto,
+    @Req() req: any,
   ) {
+
+    console.log(req.user);//debug
+
     const link = await this.shortLinkService.create(
-      createShortLinkDto.url,createShortLinkDto.customAlias,
+      createShortLinkDto.url,createShortLinkDto.customAlias, req.user.userId,
     );
 
     return {
