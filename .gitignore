@@ -1,5 +1,56 @@
-backend/.env
-backend/dist
-backend/node_modules
-frontend/.env
+# =========================
+# Node
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Environment
+# =========================
 .env
+.env.*
+!.env.example
+
+# =========================
+# Build output
+# =========================
+dist/
+build/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.yml
+
+# Local database volumes
+postgres_data/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Coverage
+# =========================
+coverage/
+
+# =========================
+# Cache
+# =========================
+.cache/

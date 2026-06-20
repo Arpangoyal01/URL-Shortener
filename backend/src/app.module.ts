@@ -13,19 +13,17 @@ import { APP_GUARD } from '@nestjs/core';
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60000,
+        ttl: 10000,
         limit: 10,
       },
     ]),
 
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url:process.env.DATABASE_URL,
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true,
-      ssl:{
-        rejectUnauthorized: false,
-      },
+      ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
     }),
     ShortLinkModule,
     AnalyticsModule,
