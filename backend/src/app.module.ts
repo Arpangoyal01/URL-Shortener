@@ -5,15 +5,19 @@ import { ShortLinkModule } from './short-link/short-link.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    RedisModule,
+
     ThrottlerModule.forRoot([
       {
-        ttl: 10000,
+        ttl: 5000,
         limit: 10,
       },
     ]),

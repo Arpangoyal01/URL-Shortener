@@ -8,98 +8,95 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { ShortLink } from './entities/short-link.entity';
-
 import * as crypto from 'crypto';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class ShortLinkService {
+  private readonly CACHE_TTL_SECONDS = 24 * 60 * 60; // 24 hour
+
   constructor(
     @InjectRepository(ShortLink)
     private shortLinkRepository: Repository<ShortLink>,
-  ) { }
+    private readonly redisService: RedisService,
+  ) {}
 
-  // it is finding first raw value of coloumn from database table
-  async findOneByCode(shortCode: string) {
-    return this.shortLinkRepository.findOneBy({ shortCode });
+  private cacheKey(shortCode: string) {
+    return `shortlink:${shortCode}`;
   }
 
-  // // this is checking already existing url in database
-  // async create(longUrl: string,) {
-  //   const existing =
-  //     await this.shortLinkRepository.findOneBy({
-  //       longUrl, 
-  //     });
+  async findOneByCode(shortCode: string) {
+    const key = this.cacheKey(shortCode);
 
-  //   if (existing) {
-  //     return existing;
-  //   }
+    const cached = await this.redisService.getJson<ShortLink>(key);
+    if (cached) {
+      return cached;
+    }
 
-  //   const shortCode =
-  //     await this.generateUniqueShortCode(longUrl);
-  //     //create() performs in memory and makes it combined one entity object
-  //     const newLink =  
-  //     this.shortLinkRepository.create({ 
-  //       longUrl,
-  //       shortCode,
-  //     });
+    const link = await this.shortLinkRepository.findOneBy({ shortCode });
 
-  //   return this.shortLinkRepository.save(newLink);
-  // }
+    if (link) {
+      await this.redisService.setJson(key, link, this.CACHE_TTL_SECONDS);
+    }
 
+    return link;
+  }
 
-  //custom alias
-  async create(
-    longUrl: string,
-    customAlias?: string,
-  ) {
-    const existing =
-      await this.shortLinkRepository.findOneBy({
-        longUrl,
-      });
+  async create(longUrl: string, customAlias?: string) {
+    const existing = await this.shortLinkRepository.findOneBy({ longUrl });
 
     if (existing) {
+      await this.redisService.setJson(
+        this.cacheKey(existing.shortCode),
+        existing,
+        this.CACHE_TTL_SECONDS,
+      );
       return existing;
     }
 
     if (customAlias) {
-      const aliasExists =
-        await this.shortLinkRepository.findOneBy({
-          shortCode: customAlias,
-        });
+      const aliasExists = await this.findOneByCode(customAlias);
 
       if (aliasExists) {
-        throw new ConflictException(
-          'Custom alias already taken',
-        );
+        throw new ConflictException('Custom alias already taken');
       }
 
-      const newLink =
-        this.shortLinkRepository.create({
-          longUrl,
-          shortCode: customAlias,
-        });
-
-      return this.shortLinkRepository.save(newLink);
-    }
-
-    const shortCode =
-      await this.generateUniqueShortCode(longUrl);
-
-    const newLink =
-      this.shortLinkRepository.create({
+      const newLink = this.shortLinkRepository.create({
         longUrl,
-        shortCode,
+        shortCode: customAlias,
       });
 
-    return this.shortLinkRepository.save(newLink);
+      const saved = await this.shortLinkRepository.save(newLink);
+
+      await this.redisService.setJson(
+        this.cacheKey(saved.shortCode),
+        saved,
+        this.CACHE_TTL_SECONDS,
+      );
+
+      return saved;
+    }
+
+    const shortCode = await this.generateUniqueShortCode(longUrl);
+
+    const newLink = this.shortLinkRepository.create({
+      longUrl,
+      shortCode,
+    });
+
+    const saved = await this.shortLinkRepository.save(newLink);
+
+    await this.redisService.setJson(
+      this.cacheKey(saved.shortCode),
+      saved,
+      this.CACHE_TTL_SECONDS,
+    );
+
+    return saved;
   }
 
-
-  private async generateUniqueShortCode(
-    longUrl: string,
-  ): Promise<string> {
+  private async generateUniqueShortCode(longUrl: string): Promise<string> {
     const HASH_LENGTH = 7;
-
     let attempt = 0;
 
     while (attempt < 10) {
@@ -111,8 +108,7 @@ export class ShortLinkService {
         .digest('base64url')
         .substring(0, HASH_LENGTH);
 
-      const exists =
-        await this.findOneByCode(hash);
+      const exists = await this.findOneByCode(hash);
 
       if (!exists) {
         return hash;
@@ -121,8 +117,6 @@ export class ShortLinkService {
       attempt++;
     }
 
-    throw new InternalServerErrorException(
-      'Unable to generate short code',
-    );
+    throw new InternalServerErrorException('Unable to generate short code');
   }
 }

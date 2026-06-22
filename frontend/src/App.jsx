@@ -35,8 +35,12 @@ function App() {
 
     }
     catch (error) {
-      console.log(error);
-      alert("error in code generation");
+      if (error.response?.status === 429) {
+        alert("Generation limit exceeded");
+        console.log(error); 
+      }else
+      {console.log(error);
+      alert("error in code generation");}
     }
     finally {
       setLoading(false);
@@ -54,8 +58,12 @@ function App() {
 
       setAnalytics(response.data);
     } catch (error) {
-      console.log(error);
-      alert("Error fetching analytics");
+      if (error.response?.status === 429) {
+        alert("Generation limit exceeded");
+        console.log(error); 
+      }else
+      {console.log(error);
+      alert("error fetching analytics");}
     }
   };
 
